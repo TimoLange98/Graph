@@ -8,7 +8,7 @@ namespace Graph
 
         public List<NodeG<T>> NodesInGraph;
         List<Edge<T>> AllEdges;
-        
+
         public Graph(params T[] datas)
         {
             AddNodes(datas);
@@ -33,7 +33,7 @@ namespace Graph
         }
 
         //-----------------------------------------------------------------------------------------
-        void RemoveSingleNode(bool removeEdges, T data)
+        void RemoveSingleNode(T data, bool removeEdges = default)
         {
             var node = FindNode(data);
 
@@ -52,10 +52,10 @@ namespace Graph
 
             while (currentEdge != null)
             {
-                if (currentEdge.Data.FirstLocOfEdge.NodeData.Equals(node.NodeData))
-                    RemoveEdge(node.NodeData, currentEdge.Data.SecondLocOfEdge.NodeData);
+                if (currentEdge.Data.FirstNodeOfEdge.NodeData.Equals(node.NodeData))
+                    RemoveEdge(node.NodeData, currentEdge.Data.SecondNodeOfEdge.NodeData);
 
-                RemoveEdge(node.NodeData, currentEdge.Data.FirstLocOfEdge.NodeData);
+                RemoveEdge(node.NodeData, currentEdge.Data.FirstNodeOfEdge.NodeData);
             }
         }
 
@@ -67,14 +67,19 @@ namespace Graph
         }
 
         //-----------------------------------------------------------------------------------------
-        public void RemoveNodes(bool removeEdges = false, params T[] datas)
+        public void RemoveEdges(params T[] datas)
         {
             foreach (var data in datas)
-                RemoveSingleNode(removeEdges, data);
+                RemoveSingleNode(data);
+        }
+        public void RemoveNodes(bool removeEdges, params T[] datas)
+        {
+            foreach (var data in datas)
+                RemoveSingleNode(data, removeEdges);
         }
 
         //-----------------------------------------------------------------------------------------
-        public void AddEdge(T firstLocData, T data, T secondLocData)
+        public void AddEdge(T firstLocData, int data, T secondLocData)
         {
             var (FirstLoc, SecondLoc) = CheckNodes(firstLocData, secondLocData);
             CheckIfEdgeAlreadyExist(FirstLoc, SecondLoc);
@@ -114,30 +119,28 @@ namespace Graph
         }
 
 
-        //public (List<T>, T) FindConnection(T firstLoc, T secondLoc)
-        //{
-        //    List<List<NodeG<T>>> paths;
-        //    T pathData;
+        public (List<NodeG<T>>, T) FindConnection(T firstLoc, T secondLoc, int pathData = default)
+        {
+            List<NodeG<T>> paths;
 
-        //    var (FirstLoc, SecondLoc) = CheckNodes(firstLoc, secondLoc);
+            var Pathdata = pathData;
 
-        //    //----------------------------------------------------------------------
+            var (FirstLoc, SecondLoc) = CheckNodes(firstLoc, secondLoc);
 
-        //    var path = new List<NodeG<T>>();
+            //-----------------------------------------
+            var path = new List<NodeG<T>>();
 
-        //    var currentNode = FirstLoc;
-        //    var temp = currentNode.Edges.First;
+            var currentNode = FirstLoc;
+            var temp = currentNode.Edges.First;
 
-        //    while (temp != null)
-        //    {
-        //        if (currentNode.Data.Equals(temp.Data.SecondLoc.Data))
-        //        {
-        //            path.Add(currentNode);
-        //        }
-        //    }
-
-
-        //}
+            while (temp != null)
+            {
+                if (currentNode.NodeData.Equals(temp.Data.SecondNodeOfEdge.NodeData))
+                {
+                    path.Add(currentNode);
+                }
+            }
+        }
 
 
         //public List<List<T>> FindConnections(T firstLoc, T secondLoc)
@@ -198,7 +201,7 @@ namespace Graph
 
             if (node != null)
                 return node;
-            
+
             throw new Exception("Value doesn't exist!");
         }
 

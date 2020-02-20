@@ -5,15 +5,15 @@ namespace Graph
 {
     public class Edge<T>
     {
-        public NodeG<T> FirstLocOfEdge;
-        public T EdgeData;
-        public NodeG<T> SecondLocOfEdge;
+        public NodeG<T> FirstNodeOfEdge;
+        public int EdgeData;
+        public NodeG<T> SecondNodeOfEdge;
 
-        public Edge(NodeG<T> firstLoc, T data, NodeG<T> secondLoc)
+        public Edge(NodeG<T> firstLoc, int data, NodeG<T> secondLoc)
         {
-            FirstLocOfEdge = firstLoc;
+            FirstNodeOfEdge = firstLoc;
             EdgeData = data;
-            SecondLocOfEdge = secondLoc;
+            SecondNodeOfEdge = secondLoc;
         }
     }
 }
