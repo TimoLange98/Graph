@@ -21,9 +21,25 @@ namespace Graph
             return NodeData.ToString();
         }
 
-        public void RemoveEdge()
+        public bool IsNeighbour(T data)
         {
-            //todo
+            var currentEdge = Edges.First;
+
+            while (currentEdge != null)
+            {
+                if (currentEdge.Data.FirstNodeOfEdge.Equals(this))
+                {
+                    if (currentEdge.Data.SecondNodeOfEdge.NodeData.Equals(data))
+                        return true;
+                }
+
+                else if (currentEdge.Data.FirstNodeOfEdge.NodeData.Equals(data))
+                    return true;
+
+                currentEdge = currentEdge.Next;
+            }
+
+            return false;
         }
     }
 }

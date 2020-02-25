@@ -33,21 +33,23 @@ namespace Graph
             Console.WriteLine();
 
 
-            //var edges = testGraph.GetAllEdges();
+            var edges = testGraph.GetAllEdges();
 
-            //var currentEdge = edges.First;
+            var currentEdge = edges.First;
 
-            //while (currentEdge != null)
-            //{
-            //    Console.WriteLine($"{currentEdge.Data.FirstNodeOfEdge};  {currentEdge.Data.EdgeData};  {currentEdge.Data.SecondNodeOfEdge}");
+            while (currentEdge != null)
+            {
+                Console.WriteLine($"{currentEdge.Data.FirstNodeOfEdge};  {currentEdge.Data.EdgeData};  {currentEdge.Data.SecondNodeOfEdge}");
 
-            //    currentEdge = currentEdge.Next;
-            //}
+                currentEdge = currentEdge.Next;
+            }
+            Console.WriteLine();
 
-            ////-----------------------Removing a node...------------------------------------------------
-            //testGraph.RemoveNodes(false, "Hauptbahnhof");
+            //////-----------------------Removing a node...------------------------------------------------
+            //testGraph.RemoveNodes(true, "Hauptbahnhof");
 
             //testGraph.NodesInGraph.PrintToConsole();
+
             //Console.WriteLine();
 
             //edges = testGraph.GetAllEdges();
@@ -60,6 +62,9 @@ namespace Graph
 
             //    currentEdge = currentEdge.Next;
             //}
+
+
+
         }
     }
 }

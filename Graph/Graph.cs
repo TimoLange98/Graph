@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+//using System.Linq;
 
 namespace Graph
 {
@@ -8,6 +9,7 @@ namespace Graph
 
         public List<NodeG<T>> NodesInGraph;
         List<Edge<T>> AllEdges;
+
 
         public Graph(params T[] datas)
         {
@@ -39,7 +41,7 @@ namespace Graph
 
             if (node.Edges != null && removeEdges == false)
             {
-                throw new Exception("There are still connection(s) refering to this Element");
+                throw new Exception("There is at least still one connection refering to this Element");
             }
 
             else if (node.Edges == null)
@@ -52,11 +54,14 @@ namespace Graph
 
             while (currentEdge != null)
             {
-                if (currentEdge.Data.FirstNodeOfEdge.NodeData.Equals(node.NodeData))
-                    RemoveEdge(node.NodeData, currentEdge.Data.SecondNodeOfEdge.NodeData);
+                if (AllEdges.Exists(x => x.FirstNodeOfEdge.NodeData.Equals(currentEdge.Data.FirstNodeOfEdge.NodeData) && x.SecondNodeOfEdge.NodeData.Equals(currentEdge.Data.SecondNodeOfEdge.NodeData)))
+                    RemoveEdge(currentEdge.Data.FirstNodeOfEdge.NodeData, currentEdge.Data.SecondNodeOfEdge.NodeData);
+                else
+                    RemoveEdge(currentEdge.Data.SecondNodeOfEdge.NodeData, currentEdge.Data.FirstNodeOfEdge.NodeData);
 
-                RemoveEdge(node.NodeData, currentEdge.Data.FirstNodeOfEdge.NodeData);
+                currentEdge = currentEdge.Next;
             }
+            NodesInGraph.Remove(node);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -67,11 +72,11 @@ namespace Graph
         }
 
         //-----------------------------------------------------------------------------------------
-        public void RemoveEdges(params T[] datas)
-        {
-            foreach (var data in datas)
-                RemoveSingleNode(data);
-        }
+        //public void RemoveEdges(params T[] datas)
+        //{
+        //    foreach (var data in datas)
+        //        RemoveEdge(data);
+        //}
         public void RemoveNodes(bool removeEdges, params T[] datas)
         {
             foreach (var data in datas)
@@ -96,51 +101,84 @@ namespace Graph
         {
             var (FirstLoc, SecondLoc) = CheckNodes(firstLoc, secondLoc);
 
-            var pointerFirst = FirstLoc.Edges.First;
+            var remove = GetEdge(firstLoc, secondLoc);
 
-            while (pointerFirst != null)
-            {
-                var pointerSecond = SecondLoc.Edges.First;
+            AllEdges.Remove(remove);
+            FirstLoc.Edges.Remove(remove);
+            SecondLoc.Edges.Remove(remove);
 
-                while (pointerSecond != null)
-                {
-                    if (pointerFirst.Data.Equals(pointerSecond.Data))
-                    {
-                        FirstLoc.Edges.Remove(pointerFirst.Data);
-                        SecondLoc.Edges.Remove(pointerSecond.Data);
-                        return;
-                    }
-                    pointerSecond = pointerSecond.Next;
-                }
-                pointerFirst = pointerFirst.Next;
-            }
-
-            throw new Exception("Theres no connection that could be removed!");
+            //throw new Exception("Theres no connection that could be removed!");
         }
 
 
-        public (List<NodeG<T>>, T) FindConnection(T firstLoc, T secondLoc, int pathData = default)
+        public (List<T>, int) FindConnection(T firstLoc, T secondLoc)
         {
-            List<NodeG<T>> paths;
+            var ways = new List<List<NodeG<T>>>();
+            var firstL = new List<NodeG<T>>();
+            firstL.Add(FindNode(firstLoc));
 
-            var Pathdata = pathData;
+            ways.Add(firstL);
 
-            var (FirstLoc, SecondLoc) = CheckNodes(firstLoc, secondLoc);
+            var newWays = ways;
+            var foundNewWay = true;
 
-            //-----------------------------------------
-            var path = new List<NodeG<T>>();
-
-            var currentNode = FirstLoc;
-            var temp = currentNode.Edges.First;
-
-            while (temp != null)
+            while (foundNewWay)
             {
-                if (currentNode.NodeData.Equals(temp.Data.SecondNodeOfEdge.NodeData))
+                var currentWay = newWays.First;
+
+                while (currentWay !=null)
                 {
-                    path.Add(currentNode);
+                    var tempNewWays = CheckForWays(currentWay.Data);
+                        ways.AddRange(tempNewWays);
+
+                    currentWay = currentWay.Next;
                 }
+                
             }
         }
+
+        List<List<NodeG<T>>> CheckForWays(List<NodeG<T>> oldList)
+        {
+            var result = new List<List<NodeG<T>>>();
+
+            var lastNode = oldList.Last;
+
+            var edges = lastNode.Data.Edges;
+
+            var allNodes = new List<NodeG<T>>();
+
+            var currentEdge = edges.First;
+
+            while (currentEdge != null)
+            {
+                if (!oldList.Exists(x => x.Equals(currentEdge.Data.FirstNodeOfEdge)) && !allNodes.Exists(x => x.Equals(currentEdge.Data.FirstNodeOfEdge)))
+                    allNodes.Add(currentEdge.Data.FirstNodeOfEdge);
+
+                if (!oldList.Exists(x => x.Equals(currentEdge.Data.SecondNodeOfEdge)) && !allNodes.Exists(x => x.Equals(currentEdge.Data.SecondNodeOfEdge)))
+                    allNodes.Add(currentEdge.Data.SecondNodeOfEdge);
+
+                currentEdge = currentEdge.Next;
+            }
+
+            var currentNode = allNodes.First;
+            while (currentNode != null)
+            {
+                var temp = new List<NodeG<T>>();
+
+                //------Liste in temp kopieren-------------
+                var currentNodeInOldList = oldList.First;
+                while (currentNodeInOldList != null)
+                {
+                    temp.Add(currentNodeInOldList.Data);
+                    currentNodeInOldList = currentNodeInOldList.Next;
+                }
+                //-----------------------------------------
+                temp.Add(currentNode.Data);
+                result.Add(temp);
+            }
+            return result;
+        }
+
 
 
         //public List<List<T>> FindConnections(T firstLoc, T secondLoc)
@@ -207,25 +245,12 @@ namespace Graph
 
         public List<Edge<T>> GetAllEdges()
         {
-            //var allEdges = new List<Edge<T>>();
-
-            //var currentNode = NodesInGraph.First;
-
-            //while (currentNode != null && currentNode.Data.Edges != null)
-            //{
-            //    var currentEdge = currentNode.Data.Edges.First;
-
-            //    while (currentEdge != null)
-            //    {
-            //        if (!allEdges.Exists(x => x.Equals(currentEdge.Data)))
-            //        {
-            //            allEdges.Add(currentEdge.Data);
-            //        }
-            //        currentEdge = currentEdge.Next;
-            //    }
-            //    currentNode = currentNode.Next;
-            //}
             return AllEdges;
+        }
+
+        Edge<T> GetEdge(T firstLoc, T secondLoc)
+        {
+            return AllEdges.Find(x => x.FirstNodeOfEdge.NodeData.Equals(firstLoc) && x.SecondNodeOfEdge.NodeData.Equals(secondLoc));
         }
     }
 }

@@ -276,7 +276,7 @@ namespace Graph
                 }
                 else
                 {
-                    Console.Write("|" + help.Data + "|->");
+                    Console.Write("|" + help.Data + "|<->");
                     help = help.Next;
                 }
             }
@@ -285,30 +285,33 @@ namespace Graph
 
         public void Remove(T value)
         {
-            var help = First;
+            var currentNode = First;
 
-            while (!help.Data.Equals(value))            
+            while (!currentNode.Data.Equals(value))            
             {
-                if (help.Next == null)
+                if (currentNode.Next == null)
                     return;
 
-                help = help.Next;
+                currentNode = currentNode.Next;
             }
 
-            if (help == First)
+            if (Nodes == 1)
+                Clear();
+
+            else if (currentNode == First)
             {
-                First = help.Next;
+                First = currentNode.Next;
                 First.Prev = null;
             }
-            else if (help == Last)
+            else if (currentNode == Last)
             {
-                Last = help.Prev;
+                Last = currentNode.Prev;
                 Last.Next = null;
             }
             else
             {
-                help.Prev.Next = help.Next;
-                help.Next.Prev = help.Prev;
+                currentNode.Prev.Next = currentNode.Next;
+                currentNode.Next.Prev = currentNode.Prev;
             }
             Nodes--;
         }
