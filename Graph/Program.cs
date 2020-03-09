@@ -44,6 +44,24 @@ namespace Graph
                 currentEdge = currentEdge.Next;
             }
             Console.WriteLine();
+            Console.WriteLine();
+
+            (var List, int costs) = testGraph.FindConnection("Hauptbahnhof", "Ostkreuz");
+
+            var help = List.First;
+
+            while (help != null)
+            {
+                var help2 = help.Data.First;
+                while (help2 != null)
+                {
+                    Console.Write(help2.Data.NodeData + " -> ");
+
+                    help2 = help2.Next;
+                }
+                Console.WriteLine();
+                help = help.Next;
+            }
 
             //////-----------------------Removing a node...------------------------------------------------
             //testGraph.RemoveNodes(true, "Hauptbahnhof");

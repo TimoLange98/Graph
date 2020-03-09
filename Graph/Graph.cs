@@ -26,9 +26,8 @@ namespace Graph
             while (help != null)
             {
                 if (help.Data.Equals(data))
-                {
                     return;
-                }
+
                 help = help.Next;
             }
             NodesInGraph.Add(new NodeG<T>(data));
@@ -40,9 +39,7 @@ namespace Graph
             var node = FindNode(data);
 
             if (node.Edges != null && removeEdges == false)
-            {
                 throw new Exception("There is at least still one connection refering to this Element");
-            }
 
             else if (node.Edges == null)
             {
@@ -111,30 +108,45 @@ namespace Graph
         }
 
 
-        public (List<T>, int) FindConnection(T firstLoc, T secondLoc)
+        public (List<List<NodeG<T>>>, int) FindConnection(T firstLoc, T secondLoc)
         {
-            var ways = new List<List<NodeG<T>>>();
-            var firstL = new List<NodeG<T>>();
-            firstL.Add(FindNode(firstLoc));
+            var allWays = new List<List<NodeG<T>>>();
+            var costs = 0;
 
-            ways.Add(firstL);
+            var firstListOfFirstLoc = new List<NodeG<T>>();
 
-            var newWays = ways;
+            firstListOfFirstLoc.Add(FindNode(firstLoc));
+
+            allWays.Add(firstListOfFirstLoc);
+
+            var newWays = allWays;
             var foundNewWay = true;
+
+            var currentListOfWays = newWays.First;
+            //var tempNewWays = new List<List<NodeG<T>>>();
 
             while (foundNewWay)
             {
-                var currentWay = newWays.First;
-
-                while (currentWay !=null)
+                while (currentListOfWays !=null)
                 {
-                    var tempNewWays = CheckForWays(currentWay.Data);
-                        ways.AddRange(tempNewWays);
+                    var tempNewWays = CheckForWays(currentListOfWays.Data);
 
-                    currentWay = currentWay.Next;
+                    if (tempNewWays.First == null)
+                    {
+                        foundNewWay = false;
+                        break;
+                    } 
+                    else
+                    {
+                        allWays.AddRange(tempNewWays);
+                        currentListOfWays = currentListOfWays.Next;
+                    }
                 }
-                
             }
+
+            var allWaysWithDest = allWays.FindAll(x => x.Exists(y => y.Equals(FindNode(secondLoc))));
+
+            return (allWaysWithDest, 0);
         }
 
         List<List<NodeG<T>>> CheckForWays(List<NodeG<T>> oldList)
@@ -161,6 +173,7 @@ namespace Graph
             }
 
             var currentNode = allNodes.First;
+
             while (currentNode != null)
             {
                 var temp = new List<NodeG<T>>();
@@ -175,19 +188,15 @@ namespace Graph
                 //-----------------------------------------
                 temp.Add(currentNode.Data);
                 result.Add(temp);
+
+                currentNode = currentNode.Next;
             }
+
             return result;
         }
 
 
-
-        //public List<List<T>> FindConnections(T firstLoc, T secondLoc)
-        //{
-        //    //Todo
-        //}
-
-
-        //-------------Checks if there are any nodes in the graph that match with the data given by the user and return the nodes if so--------------
+        //-------------Checks if there are any nodes in the graph that match with the data given by the user and returns the nodes if so--------------
         (NodeG<T>, NodeG<T>) CheckNodes(T firstData, T secondData)
         {
             NodeG<T> FirstLoc = null;
