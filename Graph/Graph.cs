@@ -108,71 +108,66 @@ namespace Graph
         }
 
 
-        public (List<List<NodeG<T>>>, int) FindConnection(T firstLoc, T secondLoc)
+        public List<List<NodeG<T>>> FindConnections(T firstLoc, T secondLoc)
         {
             var allWays = new List<List<NodeG<T>>>();
-            var costs = 0;
+            var allEdges = new List<Edge<T>>();
 
-            var firstListOfFirstLoc = new List<NodeG<T>>();
+            var firstListOnlyFirstLoc = new List<NodeG<T>>();
+            firstListOnlyFirstLoc.Add(FindNode(firstLoc));
+            allWays.Add(firstListOnlyFirstLoc);
 
-            firstListOfFirstLoc.Add(FindNode(firstLoc));
+            var currentWay = allWays.First;
 
-            allWays.Add(firstListOfFirstLoc);
-
-            var newWays = allWays;
-            var foundNewWay = true;
-
-            var currentListOfWays = newWays.First;
-            //var tempNewWays = new List<List<NodeG<T>>>();
-
-            while (foundNewWay)
+            while (currentWay != null)
             {
-                while (currentListOfWays !=null)
-                {
-                    var tempNewWays = CheckForWays(currentListOfWays.Data);
+                var tempNewWaysAndEdges = CheckForWays(currentWay.Data, allEdges);
 
-                    if (tempNewWays.First == null)
-                    {
-                        foundNewWay = false;
-                        break;
-                    } 
-                    else
-                    {
-                        allWays.AddRange(tempNewWays);
-                        currentListOfWays = currentListOfWays.Next;
-                    }
+                if (tempNewWaysAndEdges.Item1.First == null)
+                    break;
+                else
+                {
+                    allWays.AddRange(tempNewWaysAndEdges.Item1);
+                    allEdges.AddRange(tempNewWaysAndEdges.Item2);
+                    currentWay = currentWay.Next;
                 }
             }
-
             var allWaysWithDest = allWays.FindAll(x => x.Exists(y => y.Equals(FindNode(secondLoc))));
 
-            return (allWaysWithDest, 0);
+            return allWays;
         }
 
-        List<List<NodeG<T>>> CheckForWays(List<NodeG<T>> oldList)
+        (List<List<NodeG<T>>>, List<Edge<T>>) CheckForWays(List<NodeG<T>> oldList, List<Edge<T>> oldEdges)
         {
-            var result = new List<List<NodeG<T>>>();
+            var resultList = new List<List<NodeG<T>>>();
+            var resultEdges = new List<Edge<T>>();
+            var tempEdge = oldEdges.First;
+            var allNewNodes = new List<NodeG<T>>();
 
-            var lastNode = oldList.Last;
-
-            var edges = lastNode.Data.Edges;
-
-            var allNodes = new List<NodeG<T>>();
+            var edges = oldList.Last.Data.Edges;
 
             var currentEdge = edges.First;
 
             while (currentEdge != null)
             {
-                if (!oldList.Exists(x => x.Equals(currentEdge.Data.FirstNodeOfEdge)) && !allNodes.Exists(x => x.Equals(currentEdge.Data.FirstNodeOfEdge)))
-                    allNodes.Add(currentEdge.Data.FirstNodeOfEdge);
-
-                if (!oldList.Exists(x => x.Equals(currentEdge.Data.SecondNodeOfEdge)) && !allNodes.Exists(x => x.Equals(currentEdge.Data.SecondNodeOfEdge)))
-                    allNodes.Add(currentEdge.Data.SecondNodeOfEdge);
+                if (!(oldEdges.Exists(x => x.FirstNodeOfEdge.Equals(currentEdge.Data.FirstNodeOfEdge) && x.SecondNodeOfEdge.Equals(currentEdge.Data.SecondNodeOfEdge))))
+                {
+                    if (oldList.Last.Data.Equals(currentEdge.Data.SecondNodeOfEdge))
+                    {
+                        allNewNodes.Add(currentEdge.Data.FirstNodeOfEdge);
+                        resultEdges.Add(GetEdge(currentEdge.Data.FirstNodeOfEdge.NodeData, currentEdge.Data.SecondNodeOfEdge.NodeData));
+                    }
+                    else
+                    {
+                        allNewNodes.Add(currentEdge.Data.SecondNodeOfEdge);
+                        resultEdges.Add(GetEdge(currentEdge.Data.FirstNodeOfEdge.NodeData, currentEdge.Data.SecondNodeOfEdge.NodeData));
+                    }
+                }
 
                 currentEdge = currentEdge.Next;
             }
 
-            var currentNode = allNodes.First;
+            var currentNode = allNewNodes.First;
 
             while (currentNode != null)
             {
@@ -187,12 +182,50 @@ namespace Graph
                 }
                 //-----------------------------------------
                 temp.Add(currentNode.Data);
-                result.Add(temp);
+                resultList.Add(temp);
 
                 currentNode = currentNode.Next;
             }
 
-            return result;
+            return (resultList, resultEdges);
+        }
+
+
+        public (List<NodeG<T>>, int) FindBestConnection(T firstLoc, T secondLoc)
+        {
+            var allWays = FindConnections(firstLoc, secondLoc);
+
+            var result = int.MaxValue;
+            var currentWay = allWays.First;
+            var rememberWay = 0;
+
+            while (currentWay != null)
+            {
+                var costs = 0;
+                var currentLoc = currentWay.Data.First;
+
+                while (currentLoc.Next != null)
+                {
+                    costs += GetEdge(currentLoc.Data.NodeData, currentLoc.Next.Data.NodeData).EdgeData;
+                    currentLoc = currentLoc.Next;
+                }
+
+                if (costs < result)
+                {
+                    result = costs;
+                    rememberWay++;
+                }
+                currentWay = currentWay.Next;
+            }
+
+            currentWay = allWays.First;
+            var i = 1;
+            while (i < rememberWay)
+            {
+                currentWay = currentWay.Next;
+                i++;
+            }
+            return (currentWay.Data, result);
         }
 
 
@@ -259,7 +292,7 @@ namespace Graph
 
         Edge<T> GetEdge(T firstLoc, T secondLoc)
         {
-            return AllEdges.Find(x => x.FirstNodeOfEdge.NodeData.Equals(firstLoc) && x.SecondNodeOfEdge.NodeData.Equals(secondLoc));
+            return AllEdges.Find(x => (x.FirstNodeOfEdge.NodeData.Equals(firstLoc) && x.SecondNodeOfEdge.NodeData.Equals(secondLoc)) || (x.FirstNodeOfEdge.NodeData.Equals(secondLoc) && x.SecondNodeOfEdge.NodeData.Equals(firstLoc)));
         }
     }
 }

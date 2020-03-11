@@ -29,11 +29,23 @@ namespace Graph
 
         public void AddRange(List<T> add)
         {
-            Last.Next = add.First;
-            add.First.Prev = Last;
+            if (add == null)
+                return;
 
-            Last = add.Last;
-            Nodes += add.Nodes;
+            if (First == null)
+            {
+                First = add.First;
+                Last = add.Last;
+                Nodes += add.Nodes;
+            }
+            else
+            {
+                Last.Next = add.First;
+                add.First.Prev = Last;
+
+                Last = add.Last;
+                Nodes += add.Nodes;
+            }
         }
 
 
