@@ -2,7 +2,7 @@
 
 namespace Graph
 {
-    public class Program
+    public static class Program
     {
         static void Main(string[] args)
         {
@@ -22,51 +22,28 @@ namespace Graph
             testGraph.AddEdge("Gesundbrunnen", 10, "Ostkreuz");
             testGraph.AddEdge("Schöneberg", 15, "Ostkreuz");
 
-            //testGraph.NodesInGraph.PrintToConsole();
-            //Console.WriteLine();
+            
 
+            var ways = testGraph.FindConnections("Westend", "Friedrichstraße");
 
-            //var edges = testGraph.GetAllEdges();
-
-            //var currentEdge = edges.First;
-
-            //while (currentEdge != null)
-            //{
-            //    Console.WriteLine(currentEdge.Data.FirstNodeOfEdge + "" + currentEdge.Data.EdgeData + currentEdge.Data.SecondNodeOfEdge);
-
-            //    currentEdge = currentEdge.Next;
-            //}
-            //Console.WriteLine();
-            //Console.WriteLine();
-
-            //var List = testGraph.FindConnections("Hauptbahnhof", "Ostkreuz");
-
-            //var help = List.First;
-
-            //while (help != null)
-            //{
-            //    var help2 = help.Data.First;
-            //    while (help2 != null)
-            //    {
-            //        Console.Write(help2.Data.NodeData + " -> ");
-            //        help2 = help2.Next;
-            //    }
-            //    Console.WriteLine();
-            //    help = help.Next;
-            //}
-
-            //Console.WriteLine();
-
-            var bestWay = testGraph.FindBestConnection("Westend", "Friedrichstraße");
-
-            var currentLoc = bestWay.Item1.First;
-            while (currentLoc != null)
+            var help = ways.First;
+            while (help != null)
             {
-                Console.Write(currentLoc.Data.NodeData + " -> ");
-                currentLoc = currentLoc.Next;
+                Print(help.Data);
+                Console.WriteLine();
+                help = help.Next;
             }
+            //Console.Write(bestWay.Item2);
+        }
 
-            Console.Write(bestWay.Item2);
+        static void Print(List<NodeG<object>> list)
+        {
+            var help = list.First;
+            while (help != null)
+            {
+                Console.Write(help.Data.NodeData + " -> ");
+                help = help.Next;
+            }
         }
     }
 }
