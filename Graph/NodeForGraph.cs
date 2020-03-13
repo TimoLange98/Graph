@@ -16,10 +16,10 @@ namespace Graph
             Edges = new List<Edge<T>>();
         }
 
-        public override string ToString()
-        {
-            return NodeData.ToString();
-        }
+        //public override string ToString()
+        //{
+        //    return NodeData.ToString();
+        //}
 
         public bool IsNeighbour(T data)
         {
@@ -32,7 +32,6 @@ namespace Graph
                     if (currentEdge.Data.SecondNodeOfEdge.NodeData.Equals(data))
                         return true;
                 }
-
                 else if (currentEdge.Data.FirstNodeOfEdge.NodeData.Equals(data))
                     return true;
 
